@@ -1,0 +1,5 @@
+# flake8: PEP 8 style checks, allow minor updates.
+flake8>=7.0.0,<7.1
+
+# black: Code formatter, allow minor updates.
+black>=24.2.0,<24.3

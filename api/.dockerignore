@@ -1,0 +1,12 @@
+# Git - Ignore Git directories and files
+.git/
+.gitignore
+
+# Docker - Ignore Docker daemon files
+.docker/
+
+# Python environment - Ignore bytecode and virtual environments
+**/__pycache__/
+.env/
+.venv/
+venv/

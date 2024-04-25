@@ -1,0 +1,19 @@
+[flake8]
+# Files and directories to be excluded from linting
+exclude =
+  # Django migrations can include auto-generated code that doesn't always follow PEP 8
+  migrations,
+  
+  # Exclude cache directories
+  __pycache__, venv
+  
+  # manage.py is a Django script auto-generated and typically does not need linting
+  manage.py,
+  
+  # settings.py can contain lines longer than PEP 8 recommendation, e.g., long database URLs
+  settings.py
+
+max-line-length = 120
+
+# Specify the complexity threshold for the McCabe complexity checker
+max-complexity = 10

@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  # API service configuration
+  api:
+    build:
+      context: ./api/
+      args:
+        - DEV=true
+    restart: always
+    container_name: api
+    volumes:
+      - ./api:/app # Mount the API application code into the container
+    depends_on:
+      postgres:
+        condition: service_healthy # Ensure the database is ready before starting
+    environment:
+      DATABASE_NAME: "test_db"
+      DATABASE_USER: "test"
+      DATABASE_PASSWORD: "test"
+      DATABASE_HOST: "postgres"
+      DATABASE_PORT: "5432"
+      SECRET_KEY: "django-insecure-jm^6$+h%9i!yl%u7^!4_his%2b^x-qfnmsaxd7e%+kvp_9=_&$"
+      DEBUG: "true"
+      ALLOWED_HOSTS: "localhost"
+    # Consider using an .env file for environment variables to keep sensitive information out of version control
+
+  # Frontend service configuration
+  frontend:
+    build:
+      context: ./frontend/
+      target: develop-stage
+    container_name: frontend
+    restart: always
+    ports:
+      - "9005:9005"
+    volumes:
+      - ./frontend/src:/app/src # Mount the frontend source code
+      - ./frontend/index.html:/app/index.html
+
+  # Nginx reverse proxy configuration
+  nginx:
+    image: nginx:1.25-bookworm
+    container_name: nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./frontend/.nginx/dev.conf:/etc/nginx/nginx.conf # Custom Nginx configuration
+      - ./frontend/django_staticfiles:/usr/share/nginx/html # Static files
+    depends_on:
+      - api
+      - frontend
+
+  # PostgreSQL database service configuration
+  postgres:
+    image: postgres:16.1
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: "test_db"
+      POSTGRES_USER: "test"
+      POSTGRES_PASSWORD: "test" # In production, consider using Docker secrets or an equivalent
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test -d test_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    volumes:
+        - postgres-data:/var/lib/postgresql/data # Persist PostgreSQL data
+
+volumes:
+  postgres-data:
+  # Named volume for PostgreSQL to ensure data persists across container restarts
